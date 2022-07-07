@@ -11,4 +11,8 @@ before_install:
   - gcloud config set project k8s-sample-355612
   - gcloud config set compute/zone us-central1-c
   - gcloud container clusters get-credentials multi-cluster
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin 
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t srinux27/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true srinux27/react-test npm test 
