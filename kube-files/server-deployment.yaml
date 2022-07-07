@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels: 
+      component: server
+  template:
+    metadata:
+      name: server-pod
+      labels:
+        component: server
+    spec:
+      containers:
+        - image: srinux27/fib-server:latest
+          name: api
+          ports:
+            - containerPort: 5000
+          env:
+            - name: REDIS_HOST
+              value: redis-cluster-ip
+            - name: REDIS_PORT
+              value: '6379'
+            - name: PGUSER
+              value: postgres
+            - name: PGDATABASE
+              value: postgres
+            - name: PGHOST
+              value: postgres-cluster-ip
+            - name: PGPORT
+              value: '5432'
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-pg-password
+                  key: PGPASSWORD
