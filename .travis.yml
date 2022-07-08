@@ -1,9 +1,12 @@
 sudo: required
 service:
   - docker
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 before_install:
   - openssl aes-256-cbc -K $encrypted_e5a9dff215e2_key -iv $encrypted_e5a9dff215e2_iv -in k8s-sample-355612-eeb991018305.json.enc -out k8s-sample-355612-eeb991018305.json -d
-  - export CLOUDSDK_CORE_DISABLE_PROMPTS=1
   - curl https://sdk.cloud.google.com | bash > /dev/null;
   - source $HOME/google-cloud-sdk/path.bash.inc
   - gcloud components update kubectl
@@ -16,3 +19,9 @@ before_install:
 
 script:
   - docker run -e CI=true srinux27/react-test npm test 
+
+deploy:
+  provider: script
+  script: bash ./deploy.sh
+  on: 
+    branch: master
