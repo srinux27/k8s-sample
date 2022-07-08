@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+ 
+kind: Certificate
+metadata:
+  name: saba-dev-com-tls
+spec:
+  secretName: saba-dev-com
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: saba-dev.com
+  dnsNames:
+    - saba-dev.com
+    - www.saba-dev.com
