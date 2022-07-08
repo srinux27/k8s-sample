@@ -39,7 +39,7 @@ spec:
                 name: server-cluster-ip
                 port:
                   number: 5000
-    - host: saba-dev.com
+    - host: www.saba-dev.com
       http:
         paths:
           - path: /?(.*)
