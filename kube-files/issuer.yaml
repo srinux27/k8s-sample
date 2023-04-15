@@ -132,3 +132,89 @@ db.collection_name.updateMany(
 );
 
 
+db.collection_name.updateMany(
+    { "controlsApplied.country.effectiveDate": { $exists: true } },
+    [
+        {
+            $set: {
+                controlsApplied: {
+                    $map: {
+                        input: "$controlsApplied",
+                        as: "control",
+                        in: {
+                            $mergeObjects: [
+                                "$$control",
+                                {
+                                    country: {
+                                        $mergeObjects: [
+                                            "$$control.country",
+                                            {
+                                                effectiveDate: {
+                                                    $cond: {
+                                                        if: { $eq: ["$$control.country.effectiveDate", null] },
+                                                        then: null,
+                                                        else: {
+                                                            $convert: {
+                                                                input: "$$control.country.effectiveDate",
+                                                                to: "date",
+                                                                onError: null
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    ]
+);
+
+
+db.collection_name.updateMany(
+    { "controlsApplied.country.effectiveDate": { $exists: true } },
+    [
+        {
+            $set: {
+                controlsApplied: {
+                    $map: {
+                        input: "$controlsApplied",
+                        as: "control",
+                        in: {
+                            $mergeObjects: [
+                                "$$control",
+                                {
+                                    country: {
+                                        $mergeObjects: [
+                                            "$$control.country",
+                                            {
+                                                effectiveDate: {
+                                                    $cond: {
+                                                        if: { $eq: ["$$control.country.effectiveDate", null] },
+                                                        then: null,
+                                                        else: {
+                                                            $convert: {
+                                                                input: "$$control.country.effectiveDate",
+                                                                to: "date",
+                                                                onError: null
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    ]
+);
