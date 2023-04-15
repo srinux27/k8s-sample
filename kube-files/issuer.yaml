@@ -33,3 +33,35 @@ db.collection_name.aggregate([
     },
   },
 ]);
+
+
+db.collection_name.updateMany(
+  { "controlsApplied.effectiveDate": { $exists: true } },
+  [
+    {
+      $set: {
+        controlsApplied: {
+          $map: {
+            input: "$controlsApplied",
+            as: "control",
+            in: {
+              $mergeObjects: [
+                "$$control",
+                {
+                  effectiveDate: {
+                    $cond: {
+                      if: { $ne: ["$$control.effectiveDate", undefined] },
+                      then: { $toDate: "$$control.effectiveDate" },
+                      else: "$$control.effectiveDate",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+  ]
+);
+
