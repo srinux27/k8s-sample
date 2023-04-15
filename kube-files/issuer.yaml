@@ -12,3 +12,24 @@ spec:
       - http01:
           ingress:
             class: nginx
+
+
+
+
+db.collection_name.aggregate([
+  {
+    $project: {
+      sizeInMB: { $divide: [{ $bsonSize: "$$ROOT" }, 1024 * 1024] },
+    },
+  },
+  {
+    $match: {
+      sizeInMB: { $gte: YOUR_SIZE_THRESHOLD },
+    },
+  },
+  {
+    $sort: {
+      sizeInMB: -1,
+    },
+  },
+]);
