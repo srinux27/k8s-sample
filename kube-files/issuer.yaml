@@ -218,3 +218,54 @@ db.collection_name.updateMany(
         }
     ]
 );
+
+
+
+db.collection_name.updateMany(
+    { "controlsApplied.country.effectiveDate": { $exists: true } },
+    [
+        {
+            $set: {
+                controlsApplied: {
+                    $map: {
+                        input: "$controlsApplied",
+                        as: "control",
+                        in: {
+                            $mergeObjects: [
+                                "$$control",
+                                {
+                                    country: {
+                                        $cond: {
+                                            if: { $isObject: "$$control.country" },
+                                            then: {
+                                                $mergeObjects: [
+                                                    "$$control.country",
+                                                    {
+                                                        effectiveDate: {
+                                                            $cond: {
+                                                                if: { $eq: ["$$control.country.effectiveDate", null] },
+                                                                then: null,
+                                                                else: {
+                                                                    $convert: {
+                                                                        input: "$$control.country.effectiveDate",
+                                                                        to: "date",
+                                                                        onError: null
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            else: "$$control.country"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    ]
+);
