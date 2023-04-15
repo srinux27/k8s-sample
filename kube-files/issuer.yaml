@@ -95,4 +95,40 @@ db.yourCollectionName.updateMany(
   ]
 );
 
+db.collection_name.updateMany(
+    { "controlsApplied.effectiveDate": { $exists: true } },
+    [
+        {
+            $set: {
+                controlsApplied: {
+                    $map: {
+                        input: "$controlsApplied",
+                        as: "control",
+                        in: {
+                            $mergeObjects: [
+                                "$$control",
+                                {
+                                    effectiveDate: {
+                                        $cond: {
+                                            if: { $eq: ["$$control.effectiveDate", null] },
+                                            then: null,
+                                            else: {
+                                                $convert: {
+                                                    input: "$$control.effectiveDate",
+                                                    to: "date",
+                                                    onError: null
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    ]
+);
+
 
