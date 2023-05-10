@@ -371,3 +371,58 @@ $(document).ready(function() {
 </div>
 
 
+$(document).ready(function() {
+    // Fetch the data from the backend
+    $.ajax({
+        url: "/api/your-endpoint",
+        method: "GET",
+        success: function(response) {
+            // Get the table where the rows will be appended
+            var table = $("#toggleTable");
+
+            var headerRow = $('<tr>');
+            var checkboxRow = $('<tr>');
+
+            // Loop through the data and append columns to the rows
+            $.each(response, function(key, value) {
+                var checkbox = $("<input>").attr({
+                    type: 'checkbox',
+                    class: 'toggle',
+                    'data-key': key
+                }).prop('checked', value === 'active');
+                
+                headerRow.append($('<th>').text(key));
+                checkboxRow.append($('<td>').append(checkbox));
+            });
+
+            table.append(headerRow);
+            table.append(checkboxRow);
+
+            // Add event listener to handle toggle state changes
+            $(".toggle").on("change", function() {
+                const isChecked = $(this).is(":checked");
+                const state = isChecked ? "active" : "pause";
+                const key = $(this).data('key');
+                const dataToSend = { "key": key, "state": state };
+
+                $.ajax({
+                    url: "/your-backend-endpoint",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(dataToSend),
+                    success: function(response) {
+                        console.log("Server response:", response);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error("Error:", textStatus, errorThrown);
+                    }
+                });
+            });
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error("Error fetching data:", textStatus, errorThrown);
+        }
+    });
+});
+
+
