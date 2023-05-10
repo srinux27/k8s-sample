@@ -356,5 +356,18 @@ $(document).ready(function() {
     });
 });
 
+<div class="container">
+    <table id="toggleTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Checkbox</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be added here by the JavaScript -->
+        </tbody>
+    </table>
+</div>
 
 
