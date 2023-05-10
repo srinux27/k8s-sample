@@ -262,5 +262,24 @@ $(document).ready(function() {
     margin-left: 5px;
 }
 
+#toggleContainer {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.checkbox-container {
+    margin-right: 20px;
+    margin-bottom: 10px;
+}
+
+.checkbox-container label {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-container label span {
+    margin-left: 5px;
+}
+
 
 
