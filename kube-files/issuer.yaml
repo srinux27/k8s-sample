@@ -425,4 +425,27 @@ $(document).ready(function() {
     });
 });
 
+{
+    "name": "Person",
+    "type": "record",
+    "fields": [
+        {"name": "firstName", "type": "string"},
+        {"name": "lastName", "type": "string"},
+        {"name": "age", "type": "int"}
+    ]
+}
 
+{
+    "name": "Person",
+    "type": "record",
+    "fields": [
+        {"name": "firstName", "type": "string"},
+        {"name": "lastName", "type": "string"},
+        {"name": "age", "type": "int"},
+        {"name": "email", "type": ["null", "string"], "default": null}
+    ]
+}
+
+Old data without an email field can be read by new code. The email field will simply be assigned the default value of null.
+
+New data with an email field can also be read by old code. The email field will simply be ignored if the code does not know how to handle it.
