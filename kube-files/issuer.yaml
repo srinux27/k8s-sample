@@ -449,3 +449,61 @@ $(document).ready(function() {
 Old data without an email field can be read by new code. The email field will simply be assigned the default value of null.
 
 New data with an email field can also be read by old code. The email field will simply be ignored if the code does not know how to handle it.
+
+
+
+
+public class CustomKafkaConsumer<K, V> {
+
+    private final KafkaMessageListenerContainer<K, V> container;
+    private final String topic;
+    private final MessageHandler<K, V> messageHandler;
+    private final Auditor<K, V> auditor;
+    private ConsumerConfiguration configuration;
+    private ErrorHandler errorHandler;
+
+    public CustomKafkaConsumer(String topic, MessageHandler<K, V> messageHandler) {
+        this(topic, messageHandler, new ConsumerConfiguration(), new DefaultErrorHandler(), new ConsoleAuditor<>());
+    }
+
+    public CustomKafkaConsumer(String topic, MessageHandler<K, V> messageHandler, ConsumerConfiguration configuration) {
+        this(topic, messageHandler, configuration, new DefaultErrorHandler(), new ConsoleAuditor<>());
+    }
+
+    public CustomKafkaConsumer(String topic, MessageHandler<K, V> messageHandler, ConsumerConfiguration configuration, ErrorHandler errorHandler) {
+        this(topic, messageHandler, configuration, errorHandler, new ConsoleAuditor<>());
+    }
+
+    public CustomKafkaConsumer(String topic, MessageHandler<K, V> messageHandler, ConsumerConfiguration configuration, ErrorHandler errorHandler, Auditor<K, V> auditor) {
+        this.topic = topic;
+        this.messageHandler = messageHandler;
+        this.configuration = configuration;
+        this.errorHandler = errorHandler;
+        this.auditor = auditor;
+
+        ConcurrentKafkaListenerContainerFactory<K, V> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(this.configuration.getProps()));
+        factory.setErrorHandler(this.errorHandler);
+        this.container = factory.createContainer(this.topic);
+        this.init();
+    }
+
+    private void init() {
+        container.setupMessageListener(new MessageListener<K, V>() {
+            @Override
+            public void onMessage(ConsumerRecord<K, V> data) {
+                auditor.audit(data);
+                messageHandler.handle(data);
+            }
+        });
+    }
+
+    public void start() {
+        container.start();
+    }
+
+    public void stop() {
+        container.stop();
+    }
+
+}
