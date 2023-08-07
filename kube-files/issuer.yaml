@@ -574,4 +574,64 @@ public class MyKafkaListenerAnnotationBeanPostProcessor implements BeanPostProce
 }
 
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.config.KafkaListenerConfigurer;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Component
+public class MyKafkaListenerConfigurer implements KafkaListenerConfigurer {
+
+    private final MyKafkaProperties myKafkaProperties;
+    private final ApplicationContext applicationContext;
+    private final Map<String, ConcurrentKafkaListenerContainerFactory<String, String>> containerFactories = new ConcurrentHashMap<>();
+
+    public MyKafkaListenerConfigurer(MyKafkaProperties myKafkaProperties, ApplicationContext applicationContext) {
+        this.myKafkaProperties = myKafkaProperties;
+        this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void configureKafkaListeners(KafkaListenerEndpointRegistrar registrar) {
+        applicationContext.getBeansWithAnnotation(MyKafkaListener.class).forEach((beanName, bean) ->
+            Arrays.stream(bean.getClass().getMethods())
+                .filter(method -> method.isAnnotationPresent(MyKafkaListener.class))
+                .forEach(method -> {
+                    MyKafkaListener myKafkaListener = AnnotationUtils.findAnnotation(method, MyKafkaListener.class);
+                    if (myKafkaListener != null) {
+                        configureKafkaListener(myKafkaListener, bean, method, registrar);
+                    }
+                })
+        );
+    }
+
+    private void configureKafkaListener(MyKafkaListener myKafkaListener, Object bean, Method method, KafkaListenerEndpointRegistrar registrar) {
+        String propertiesRef = myKafkaListener.propertiesRef();
+        Map<String, Object> properties = myKafkaProperties.get(propertiesRef);
+        ConsumerFactory<String, String> consumerFactory = new DefaultKafkaConsumerFactory<>(properties);
+
+        ConcurrentKafkaListenerContainerFactory<String, String> containerFactory = containerFactories.computeIfAbsent(propertiesRef, k -> {
+            ConcurrentKafkaListenerContainerFactory<String, String> newContainerFactory = new ConcurrentKafkaListenerContainerFactory<>();
+            newContainerFactory.setConsumerFactory(consumerFactory);
+            newContainerFactory.setConcurrency(myKafkaListener.concurrency());
+            newContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+            return newContainerFactory;
+        });
+
+        SimpleKafkaListenerEndpoint<String, String> endpoint = new SimpleKafkaListenerEndpoint<>();
+        endpoint.setId(UUID.randomUUID().toString());
+        endpoint.setBean(bean);
+        endpoint.setMethod(method);
+        endpoint.setContainerFactory(containerFactory);
+        registrar.registerEndpoint(endpoint);
+    }
+}
+
+
 
