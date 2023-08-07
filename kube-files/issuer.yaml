@@ -633,5 +633,77 @@ public class MyKafkaListenerConfigurer implements KafkaListenerConfigurer {
     }
 }
 
+.....
+@Component
+public class MyKafkaListenerAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor {
+
+    @Autowired
+    private KafkaListenerEndpointRegistrar registrar;
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        // Get all methods in the bean
+        Method[] methods = ReflectionUtils.getAllDeclaredMethods(bean.getClass());
+
+        if (methods != null) {
+            for (Method method : methods) {
+                // Check if the method is annotated with @MyKafkaListener
+                MyKafkaListener myKafkaListener = AnnotatedElementUtils.findMergedAnnotation(method, MyKafkaListener.class);
+
+                if (myKafkaListener != null) {
+                    // Create an endpoint for this method
+                    MyKafkaListenerEndpoint<String, String> endpoint = new MyKafkaListenerEndpoint<>();
+
+                    // Configure the endpoint (ID, group, topic, etc.)
+                    endpoint.setId(UUID.randomUUID().toString());
+                    endpoint.setGroupId(myKafkaListener.groupId());
+                    endpoint.setTopics(myKafkaListener.topic());
+
+                    // Register the endpoint with the registrar
+                    registrar.registerEndpoint(endpoint);
+                }
+            }
+        }
+
+        return bean;
+    }
+}
+
+
+@Configuration
+public class MyKafkaListenerConfigurer implements KafkaListenerConfigurer {
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    private MyKafkaProperties myKafkaProperties;
+
+    @Override
+    public void configureKafkaListeners(KafkaListenerEndpointRegistrar registrar) {
+        // Iterate over all registered endpoints
+        for (KafkaListenerEndpoint endpoint : registrar.getEndpoints()) {
+            // Check if the endpoint is an instance of MyKafkaListenerEndpoint
+            if (endpoint instanceof MyKafkaListenerEndpoint) {
+                // Cast the endpoint to MyKafkaListenerEndpoint
+                MyKafkaListenerEndpoint myKafkaListenerEndpoint = (MyKafkaListenerEndpoint) endpoint;
+
+                // Get the properties for this endpoint
+                Map<String, String> properties = myKafkaProperties.get(myKafkaListenerEndpoint.getPropertiesRef());
+
+                // Create a container factory for this endpoint
+                ConsumerFactory<String, String> consumerFactory = new DefaultKafkaConsumerFactory<>(properties);
+                ConcurrentKafkaListenerContainerFactory<String, String> containerFactory = new ConcurrentKafkaListenerContainerFactory<>();
+                containerFactory.setConsumerFactory(consumerFactory);
+
+                // Set the container factory for this endpoint
+                myKafkaListenerEndpoint.setContainerFactory(containerFactory);
+            }
+        }
+    }
+}
+
+
+
 
 
