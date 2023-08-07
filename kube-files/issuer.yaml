@@ -538,3 +538,40 @@ public class CustomKafkaConsumer<K, V> {
     </plugins>
 </build>
 
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MyKafkaListenerAnnotationBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware {
+    
+    private ApplicationContext applicationContext;
+    private MyKafkaProperties myKafkaProperties;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+        this.myKafkaProperties = applicationContext.getBean(MyKafkaProperties.class);
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        Method[] methods = ReflectionUtils.getAllDeclaredMethods(bean.getClass());
+        if (methods != null) {
+            for (Method method : methods) {
+                MyKafkaListener myKafkaListener = AnnotatedElementUtils.findMergedAnnotation(method, MyKafkaListener.class);
+                if (myKafkaListener != null) {
+                    KafkaListenerConfigurer kafkaListenerConfigurer = new KafkaListenerConfigurer(applicationContext, myKafkaProperties);
+                    kafkaListenerConfigurer.configureKafkaListeners(myKafkaListener, bean, method);
+                }
+            }
+        }
+        return bean;
+    }
+}
+
+
+
