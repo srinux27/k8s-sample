@@ -706,4 +706,19 @@ public class MyKafkaListenerConfigurer implements KafkaListenerConfigurer {
 
 
 
+public void printRecordMetadata(ConsumerRecord<?, ?> record) {
+    String metadata = String.format(
+        "Topic: %s | Partition: %d | Offset: %d | Timestamp: %d | Key: %s | Value: %s",
+        record.topic(),
+        record.partition(),
+        record.offset(),
+        record.timestamp(),
+        record.key(),
+        record.value()
+    );
+
+    System.out.println(metadata);
+}
+
+
 
