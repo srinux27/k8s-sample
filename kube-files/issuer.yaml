@@ -17,7 +17,7 @@ Prerequisites
 Sample data set of property appraisals from various neighborhoods with diverse demographic profiles.
 Access to demographic data, real estate market trends, and historical property valuation records.
 Legal frameworks and ethical guidelines governing the use of data and algorithmic decision-making.
-Example
+Example-
 
 An example implementation could be a cloud-based platform where appraisers input property data, which is then processed by the AVM. The system would produce a valuation range, flag potential biases for review, and record the appraisal on a blockchain ledger. A dashboard would display real-time analytics of appraisal trends by demographic area.
 
@@ -35,6 +35,86 @@ This document is designed to outline the framework of the problem for participan
 
 
 
+------------------------
+
+Introduction (Business Need)
+
+In the real estate industry, accurate and fair property appraisals are paramount. Appraisals impact homeowners' equity, property taxes, and the ability to buy and sell homes at fair market values. Unfortunately, there is a growing concern that property appraisals may inadvertently reflect racial bias, systematically impacting neighborhoods predominantly inhabited by racial minorities. This not only affects individual homeowners but also perpetuates broader economic disparities. Addressing this issue is not just a matter of regulatory compliance and ethical obligation, but also a significant opportunity to enhance fairness and transparency in the real estate market.
+
+Challenge Description
+
+This hackathon challenge is aimed at developing a solution that can detect and help mitigate racial bias in property appraisal records. By leveraging technology, data analysis, and innovative thinking, participants will work towards creating tools that can analyze appraisal records, identify potential biases, and suggest actionable insights to promote equity in property valuations.
+
+Objectives
+
+Task 1: Bias Detection Algorithm Development
+
+Create an algorithm that can process historical appraisal data and identify patterns that may indicate racial bias.
+Task 2: Visualization Dashboard Creation
+
+Develop an interactive dashboard that visually represents the appraisal data and the identified patterns of bias for easier interpretation and analysis.
+Task 3: Mitigation Strategies Formulation
+
+Propose a set of strategies that can be implemented to reduce and prevent the introduction of bias into appraisal records.
+Task 4: Reporting Mechanism Design
+
+Design a reporting mechanism that can be used by industry professionals to address and rectify potential biases identified in appraisals.
+Prerequisites
+
+Sample Data: Access to a sanitized, anonymized dataset of property appraisal records, including details such as property location, description, valuation method, and final appraised value.
+Analytical Tools: Knowledge of data analysis software or programming languages (e.g., Python, R) for processing and analyzing datasets.
+User Interface Design: Familiarity with dashboard and UI design tools to create an accessible and informative visualization interface.
+Example
+
+An example of a potential bias might be a property in a predominantly Black neighborhood being appraised at 20% less than a comparable property in a predominantly White neighborhood, despite similar property conditions and market trends. The tool should be able to flag such discrepancies for further investigation.
+
+User Stories
+
+As a real estate appraiser, I want a tool that helps me identify when my appraisals may be influenced by unconscious bias, so that I can provide fair and equitable property valuations.
+As a homeowner, I want confidence that my property’s value isn’t being negatively impacted by racial bias, so that I can ensure my wealth isn’t unjustly diminished.
+As a loan officer, I want to ensure the appraisal reports I use to determine loan amounts are free of bias, to promote equal financial opportunities.
+As a policy-maker, I need a way to monitor the real estate market for systemic biases to inform regulatory actions and promote fairness in housing.
+This document should serve as a starting point. You may need to tailor the specifics of the objectives and prerequisites to match the technological capabilities and data availability within your organization. Additionally, involving stakeholders with experience in real estate, data science, and anti-discrimination laws would further refine and enhance the challenge.
 
 
-Regenerate
+
+
+Mortgage Loan Officer
+
+As a mortgage loan officer, I want a tool that flags potential appraisal biases in real-time, so that I can ensure the loan amounts and terms I offer are based on fair, accurate, and equitable property valuations.
+Underwriter
+
+As an underwriter, I need a system that automatically reviews appraisal reports for signs of bias against protected classes, ensuring that all lending decisions are compliant with fair lending laws and company policies.
+Compliance Officer
+
+As a compliance officer in the mortgage lending business unit, I want a comprehensive report that tracks appraisal values against neighborhood demographics, so I can proactively identify and address potential patterns of bias to prevent legal and reputational risks.
+Risk Manager
+
+As a risk manager, I need a mechanism to quantify the risk exposure from potentially biased appraisals so that the company can take corrective action and mitigate financial and reputational damage.
+Mortgage Processor
+
+As a mortgage processor, I want to be alerted if the appraisal report deviates significantly from expected value ranges based on unbiased models, so that I can follow up for a review or reconsideration of value before processing the mortgage application.
+Real Estate Appraiser
+
+As a real estate appraiser working with a mortgage lender, I want access to a database of unbiased comparable sales, ensuring that my appraisals are fair and unaffected by systemic biases.
+Customer Service Representative
+
+As a customer service representative, I want to be equipped with information about how we ensure appraisal fairness, so I can confidently address any concerns our clients may have about racial bias in their appraisals.
+Quality Control Specialist
+
+As a quality control specialist, I need a tool that retrospectively analyzes appraisals to confirm that they were conducted without bias, thereby ensuring the integrity of our mortgage lending practices.
+Home Equity Assessor
+
+As a home equity assessor, I want to ensure that the appraisals we base our home equity products on are free of bias, guaranteeing that all customers have equal access to the financial value of their homes.
+Data Analyst in Mortgage Lending
+
+As a data analyst in mortgage lending, I want to employ statistical analysis tools that identify anomalies in appraisal data that could indicate bias, ensuring that our data-driven lending decisions support our commitment to equality.
+Branch Manager
+
+As a branch manager, I need a protocol for investigating and addressing complaints about biased appraisals, ensuring that our clients trust us to rectify any issues fairly and promptly.
+Each of these user stories reflects the need for transparent, unbiased property appraisal processes that not only comply with regulations but also foster trust and fairness in the mortgage lending industry. They also underscore the importance of developing tools that support various actors in ensuring that their decisions are based on accurate and fair property valuations.
+
+
+
+
+
