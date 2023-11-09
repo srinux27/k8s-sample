@@ -1,169 +1,40 @@
-hi XYZ Services Orchestrator
-Introduction
-The XYZ Services Orchestrator is a deployable component designed to facilitate seamless workflow execution across multiple participant services. Based on Spring Boot, this orchestrator library leverages predefined configurations stored in MongoDB to determine workflow steps dynamically. Client applications can import this library to add powerful orchestration capabilities with minimal setup.
+Introduction (Business Need)
 
-Definitions
-Orchestrator Runtime: This is a Spring Boot-based library that executes dynamic workflows based on predefined configurations stored in MongoDB collections.
+In the real estate industry, fair and accurate appraisals are crucial for maintaining consumer trust and for the proper functioning of the housing market. However, evidence suggests that appraisal values can be affected by systemic biases, particularly racial bias, leading to significant disparities in the valuations of similar properties based on neighborhood demographics. This not only affects individual homeowners but can perpetuate long-standing economic inequalities and erode the integrity of the financial system. There is a critical business need for an objective, transparent, and equitable appraisal process, which is vital for lenders, insurers, investors, and all stakeholders in real estate transactions.
 
-Participant: A participant is a Spring Boot application that acts as a step in the workflow. It follows configurations provided in MongoDB for various attributes like Participant ID, communication interface (Kafka/HTTP(s)), and SLA details.
+Challenge Description
 
+The challenge is to develop a technological solution that can assist appraisers in generating objective and fair property valuations, free from the influence of racial or other irrelevant demographic biases. The solution should ensure appraisals are reflective of a property's true market value, independent of subjective human perceptions or historical data tainted with bias. It should also provide a consistent methodology that can be applied across diverse geographic locations and property types.
+
+Objectives
+
+Task 1: Create an Automated Valuation Model (AVM) that incorporates bias detection and mitigation techniques.
+Task 2: Develop a standardized reporting tool for appraisers to use, which includes a comprehensive checklist and minimizes subjective input.
+Task 3: Implement a blockchain-based ledger system to ensure transparency and immutability of appraisal records.
+Task 4: Design a feedback mechanism that allows for the contestation and review of appraisals, incorporating this input into continuous learning for the system.
 Prerequisites
-MongoDB instance with workflow and participant configurations
-Spring Boot application to host the Orchestrator
-Predefined Kafka topics for initiation and events
-Getting Started
-Add the Orchestrator library as a dependency in your Spring Boot application.
-Use the @EnableOrchestrator annotation to enable the Orchestrator functionalities.
-Ensure MongoDB collections for workflow and participant configurations are correctly set up.
-How To Use
-Orchestrator Runtime
-The orchestrator picks up configurations at runtime from MongoDB and caches them. It has an initiation endpoint that provides both REST and Kafka-based entry points. Users can initiate a workflow by sending a message to these points, and the orchestrator starts the workflow based on these configurations.
 
-Data Management in Orchestrator Runtime
-Event Store:
-The orchestrator maintains an append-only event store. This MongoDB store aids in:
+Sample data set of property appraisals from various neighborhoods with diverse demographic profiles.
+Access to demographic data, real estate market trends, and historical property valuation records.
+Legal frameworks and ethical guidelines governing the use of data and algorithmic decision-making.
+Example
 
-Duplicate message detection
-Out-of-context validations
-Providing the basis for the Synchronizer component to identify the last command for replay during SLA breaches
-Query Store:
-The Query Store keeps track of the latest state of each in-flight payment. The orchestrator updates this MongoDB document as it progresses through the workflow. This store serves as:
+An example implementation could be a cloud-based platform where appraisers input property data, which is then processed by the AVM. The system would produce a valuation range, flag potential biases for review, and record the appraisal on a blockchain ledger. A dashboard would display real-time analytics of appraisal trends by demographic area.
 
-A snapshot for current payment status
-A source for external scheduled jobs or application UI to fetch current statuses
-Event Ordering in Orchestrator Runtime
-The Orchestrator ensures that all events related to a specific payment are processed in a particular order by using the payment transaction ID as the message key in Kafka. Leveraging Kafka's default partitioner, it ensures that messages for a given payment always land in the same partition and are processed in the sequence they were produced. This mechanism allows the orchestrator to handle thousands of payments in parallel while keeping the sequence of events for each specific payment intact.
+User Stories
 
-Data Management in Participant Services
-Participants are responsible for maintaining their independent state stores. These local stores enable:
+As a mortgage processor in the home mortgage unit, I want to ensure that the appraisal values I receive for loan collateral are unbiased and accurate so that the bank can make informed lending decisions.
+As a compliance officer in the home mortgage unit, I need a system that flags potentially biased appraisals so I can review them and ensure our bank is in compliance with fair lending laws.
+As a home loan applicant from a historically undervalued neighborhood, I want confidence that my home's appraisal is based on objective criteria, ensuring I have equal access to lending opportunities.
+Conclusion
 
-Localized logic implementation
-Duplicate message identification
-Any additional state requirements specific to the participant
-Participant Obligations
-Participants are obligated to:
+By addressing the challenge of appraisal bias, the proposed solution aims to improve fairness in the real estate market, enhance the credibility of property valuations, and support the principles of equal opportunity in home financing.
 
-Be prepared for duplicate events
-Not tamper with the Transaction and Context IDs
-Honor the SLAs as configured in MongoDB
-Synchronizer
-The Synchronizer is a scheduled component within the Orchestrator library that continually scans for response delays from participants based on the configured SLAs. In case of a delay, it replays the last command to the participant, incrementing the max attempt counter for that specific command.
-
-Examples, FAQs, Troubleshooting, Contact & Support, Change Log
-For additional support and troubleshooting, please refer to the provided examples, frequently asked questions, and change logs, or contact our support team directly.
+This document is designed to outline the framework of the problem for participants of the hackathon. You may need to adjust the specific objectives and user stories based on the capabilities of your participants, the resources available, and the legal considerations of your jurisdiction.
 
 
 
---------
-Certainly, expanding the framework to include a Kafka consumer component and a control application for production support adds more layers of complexity, but also opens up opportunities for added resilience, standardization, and operational efficiency. Given your work in Java, Spring, and Kafka, as well as your interest in building high-performance systems, the OKRs would need to consider both technical depth and broad usability.
 
-### Objectives
 
-1. **Standardize Kafka Producer and Consumer Implementations**: Aim to harmonize the producer and consumer sides to bring uniformity and best practices to Kafka implementations.
 
-2. **Ensure Data Reliability and System Resilience**: Make certain that data is consistently delivered without loss or corruption, while providing mechanisms for system recovery.
-
-3. **Simplify Client Integration Across the Board**: Create a seamless experience for integrating both producer and consumer clients into the Kafka ecosystem.
-
-4. **Enhance Developer and Support Experience**: Equip development and production support teams with tools that reduce human error and facilitate effective debugging and monitoring.
-
-5. **Provide Real-time Operational Control**: Enable real-time control over Kafka consumer groups for better incident management and system healing during outages.
-
-### Key Results
-
-For **Standardize Kafka Producer and Consumer Implementations**:
-
-1. Achieve a 100% adoption rate for both producer and consumer frameworks within 6 months of release.
-2. Ensure 95% compliance to framework standards through bi-monthly code reviews.
-
-For **Ensure Data Reliability and System Resilience**:
-
-1. Implement write-ahead logs for producers and relevant recovery mechanisms for consumers to attain near 0% data loss.
-2. Conduct monthly system resilience tests, aiming for 99.9% data consistency.
-
-For **Simplify Client Integration Across the Board**:
-
-1. Cut the average client integration time by 40% for both producer and consumer clients.
-2. Reduce the error rate during integration by at least 75% within the first quarter of framework adoption.
-
-For **Enhance Developer and Support Experience**:
-
-1. Develop comprehensive documentation and examples that are accessed by at least 90% of developers involved in Kafka projects.
-2. Provide debugging and error-handling features that lead to a 60% reduction in developer troubleshooting and queries.
-
-For **Provide Real-time Operational Control**:
-
-1. Launch a control application that is used by 100% of the production support teams within a month of its rollout.
-2. Enable the pausing and resuming of at least 95% of active consumer groups through the control application.
-3. Record a 50% reduction in dead-letter queue overflow incidents within 3 months of implementing the control application.
-
-Given your focus on high-performance systems and event-driven architectures, the OKRs aimed at data reliability and system resilience are especially relevant. The control application, in particular, could be a game-changer in how you manage incidents and system outages, giving more control to support teams to mitigate issues effectively.
-
-These OKRs are designed to align with your professional goals of high productivity and early retirement as well. Successfully implementing a framework that meets these objectives could significantly improve the efficiency and resilience of your systems, adding value to the business and potentially accelerating your own career and financial goals.
-
-Would you like to dive deeper into any of these objectives or key results to explore further nuances?
-
-------
-Certainly, the additional data points about dynamic workflow configuration, lighter implementation with caching, and efficient setup and execution of payment workflow steps provide more depth to your OKR document. These features are especially in tune with your background in high-performance systems and event-driven architectures.
-
-### Objectives
-
-1. **Enable Dynamic, Code-Free Orchestration**: Facilitate dynamic setup and changes in payment workflows without requiring code modifications.
-
-2. **Enhance Performance Through Lightweight Implementation**: Utilize Kafka-based caching to improve the system's performance and resource efficiency.
-
-3. **Provide Quick and Efficient Workflow Steps Configuration**: Streamline the ability to set up and execute different steps in payment workflows.
-
-4. **Strengthen System Resilience and Reliability**: Leverage existing features like auto-replay and inbuilt error handling to ensure robust payment processing.
-
-5. **Offer Real-Time Monitoring and Alerting**: Implement a real-time monitoring feature that can flag and alert any issues in payment workflows.
-
-6. **Integrate Seamlessly with Existing Kafka Frameworks**: Ensure that the orchestration framework can be easily plugged into existing Kafka frameworks for a seamless operational experience.
-
-### Key Results
-
-For **Enable Dynamic, Code-Free Orchestration**:
-
-1. Achieve a 100% rate of workflows configured dynamically without requiring code changes within three months.
-2. Record a 50% reduction in time taken to alter or introduce new workflow configurations.
-
-For **Enhance Performance Through Lightweight Implementation**:
-
-1. Validate a 20% improvement in system performance through Kafka-based caching mechanisms.
-2. Measure and ensure a reduction in resource usage by at least 15%.
-
-For **Provide Quick and Efficient Workflow Steps Configuration**:
-
-1. Enable the setup of new workflow steps in under 30 minutes on average.
-2. Achieve a 99% accuracy rate in the execution of dynamically configured workflow steps.
-
-For **Strengthen System Resilience and Reliability**:
-
-1. Maintain a message loss rate of near 0%.
-2. Ensure at least 99.9% reliability in payment processing through bi-weekly audits.
-
-For **Offer Real-Time Monitoring and Alerting**:
-
-1. Implement a real-time monitoring system that identifies at least 95% of payment bottlenecks or failures within 5 minutes.
-2. Enable alert mechanisms that reduce incident resolution time by 30%.
-
-For **Integrate Seamlessly with Existing Kafka Frameworks**:
-
-1. Ensure 100% interoperability with existing Kafka frameworks through comprehensive testing.
-2. Achieve 90% developer access to published integration guidelines.
-
-### Operational and Commercial Benefits
-
-**Operational Benefits**:
-
-1. **Flexibility and Agility**: Dynamic, code-free orchestration will allow for rapid changes, making the system more agile and responsive to business needs.
-2. **Performance Optimization**: Kafka-based caching will reduce resource usage and improve overall system performance, aligning with your expertise in high-performance systems.
-
-**Commercial Benefits**:
-
-1. **Competitive Advantage**: Faster, more flexible, and more reliable payment processing can serve as a differentiator in the market.
-2. **Cost Efficiency**: Reduced development time and resource usage will likely translate into significant cost savings.
-
-With these additions, the OKR report now addresses the full scope of your orchestration framework, from its technical intricacies to its operational and commercial benefits. The added focus on performance and dynamic capabilities ties in well with your overarching goals and technical interests in high-performance and event-driven systems.
-
-Would you like to further elaborate on any of these points?
+Regenerate
