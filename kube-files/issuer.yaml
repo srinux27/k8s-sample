@@ -201,4 +201,48 @@ Certainly! Identifying key actors and crafting user stories are essential steps 
 
 These user stories provide a glimpse into the needs and expectations of different stakeholders, guiding the development of a comprehensive and efficient event management platform.
 
+/--///Absolutely, here's a structured document for the hackathon challenge centered on designing a virtual event management platform:
+
+---
+
+**Introduction (Business Need)**
+
+In today’s increasingly remote and digital work environment, virtual events have become a staple for organizational communication, team building, and training. A comprehensive, user-friendly platform for managing these events is essential. Such a platform needs to streamline the process of setting up, scheduling, and managing virtual events, catering to a variety of organizational needs and event formats.
+
+**Challenge Description**
+
+The challenge is to develop a robust, intuitive virtual event management platform that enables event organizers within an organization to effortlessly set up, schedule, and manage events. The platform should offer flexibility in targeting specific attendees or hosting open events, with capabilities like participant registration management, attendance tracking, and participant engagement analytics.
+
+**Objectives**
+
+- **Task 1**: Create a user-friendly interface for event organizers to set up and schedule events.
+- **Task 2**: Develop a system for managing attendee registrations, including limitations on participant numbers.
+- **Task 3**: Implement features for capturing and tracking attendance.
+- **Task 4**: Design a convenient and seamless registration process for participants, incorporating features like QR code scanning.
+- **Task 5 (Good to Have)**: Add event reporting tools for administrators to track and analyze events by various metrics (group, department, theme, time, participant count, engagement).
+
+**Prerequisites**
+
+- Access to a web development framework and a database management system.
+- Mock data for different types of organizational events and user profiles.
+- Tools for generating and reading QR codes.
+
+**Example**
+
+An example could be a web application where organizers can log in, fill in event details, set participant limits, and generate event announcements with QR codes. Attendees could use the platform or a mobile app to scan the QR code, automatically registering them for the event and adding it to their digital calendar.
+
+**User Stories**
+
+- As an HR manager, I want to set up a virtual team-building event for my department, limiting it to 50 participants, so that it remains interactive and manageable.
+- As an employee, I want to easily find and register for upcoming virtual events relevant to my interests or department using a QR code.
+- As an IT administrator, I need to generate a monthly report on the number and types of virtual events conducted across departments, including attendance and engagement metrics.
+
+**Conclusion**
+
+This platform aims to simplify and enhance the experience of managing and participating in virtual events within an organization. By offering a range of features from easy setup and scheduling to detailed event analytics, the platform caters to the evolving needs of modern, digitally-enabled workplaces.
+
+---
+
+This template outlines the basic structure of the challenge for the hackathon participants. It provides a clear problem statement and specific tasks that need to be addressed, along with potential user stories that bring the problem to life. You can adjust the specific tasks and features based on the technical level of your participants and the resources available.
+
 
