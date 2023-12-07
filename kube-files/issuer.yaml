@@ -115,6 +115,90 @@ As a branch manager, I need a protocol for investigating and addressing complain
 Each of these user stories reflects the need for transparent, unbiased property appraisal processes that not only comply with regulations but also foster trust and fairness in the mortgage lending industry. They also underscore the importance of developing tools that support various actors in ensuring that their decisions are based on accurate and fair property valuations.
 
 
+---------
+I need to design a problem statement for a company wide hackathon.  the hackathon participants need to design an event management platform for hosting virtual events within the organisation.   The platform must enable event organisers to easily setup and schedule a team event and manage the attendees. They can choose to target specific attendees or have an open for all public event. The platform must provide features like ability to capture participants registrations, limit number of participants for an event ,  capture attendance details etc. it must also provide a seamless and convenient participant registration process. The participants must be provided with unique and simple or convenient ways of finding an event and signing up for it - some ideas like a simple QR code to scan to auto register or take you to register page etc. some good to have features include event reporting for administrators- things like how many events conducted by group, department, theme and statistics attached to those events like time , participant count, engagement etc. Can you think of additional requirements that would make this problem more enticing ? 
 
+Designing a problem statement for a company-wide hackathon focused on creating an event management platform for virtual events is an exciting challenge, especially given the specific requirements you've outlined. Here are additional ideas to enhance the problem statement and make it more enticing for participants:
+
+1. **Integration with Existing Systems**: Require that the platform integrates seamlessly with the company's existing systems, like calendars (Google Calendar, Outlook), communication tools (Slack, Teams), and HR management systems. This integration would allow for automatic updates and notifications.
+
+2. **Customizable Event Pages**: The platform should enable organizers to create customizable event pages, where they can add branding, videos, links, and resources relevant to the event.
+
+3. **Interactive Features During Events**: Encourage the development of interactive features like live polls, Q&A sessions, breakout rooms, and real-time reactions to increase engagement during events.
+
+4. **Gamification Elements**: Introduce gamification elements to encourage participation. This could include features like leaderboards for most active attendees, rewards or badges for participation, and challenges or quests during events.
+
+5. **Accessibility and Inclusion**: Focus on making the platform accessible to all employees, including those with disabilities. This could involve voice command functionalities, screen reader compatibility, and sign language interpretation options.
+
+6. **Networking Opportunities**: Include features that facilitate networking, like 'virtual coffee breaks', random matchmaking for one-on-one chats, or thematic discussion rooms.
+
+7. **Advanced Analytics and Feedback Collection**: Beyond basic statistics, the platform could offer sentiment analysis of participant feedback, trend analysis over time, and predictive analytics for future event planning.
+
+8. **Security and Privacy**: Emphasize the importance of data security and privacy, especially in handling personal information of attendees. The platform should comply with GDPR and other relevant data protection regulations.
+
+9. **Sustainability Tracking**: Incorporate features that help in tracking the sustainability impact of virtual events, like calculating carbon footprint savings from not traveling to in-person events.
+
+10. **Multi-Language Support**: Ensure the platform supports multiple languages, catering to a global workforce and enhancing inclusivity.
+
+11. **Hybrid Event Compatibility**: Even though the focus is on virtual events, consider future scalability to support hybrid events (both in-person and virtual).
+
+12. **AI-Assisted Event Planning**: Implement AI-driven suggestions for event organizers, like optimal scheduling based on participant availability, theme suggestions, or speaker recommendations.
+
+13. **Mental Health and Wellbeing Features**: Given the current focus on employee wellbeing, include features that promote mental health, like mindfulness sessions or 'no meeting' day suggestions.
+
+14. **Mobile App Integration**: Ensure there's a mobile-friendly version or app of the platform, to increase accessibility and convenience for users.
+
+Adding these elements can make the hackathon challenge more comprehensive, innovative, and aligned with current technological trends and organizational needs. This would not only make the problem more enticing but also ensure the developed solution is robust and future-proof.
+
+-------
+Certainly! Identifying key actors and crafting user stories are essential steps in designing a system like an event management platform for virtual events. Here are some potential actors and corresponding user stories:
+
+### Actors
+
+1. **Event Organizers**
+   - Corporate HR team members
+   - Department heads or team leaders
+   - Special interest groups within the company (e.g., wellness committee)
+
+2. **Attendees**
+   - Regular employees
+   - Senior management
+   - New hires or interns
+
+3. **Administrators**
+   - IT support team
+   - Corporate communications team
+   - Data analysts or HR analytics team
+
+4. **External Participants**
+   - Guest speakers or trainers
+   - Partners or clients for certain open events
+
+5. **System Developers**
+   - In-house tech team
+   - Third-party developers or consultants
+
+### User Stories
+
+1. **Event Organizer:**
+   - As a department head, I want to easily schedule a team-building event, so that I can improve team cohesion without spending too much time on administrative tasks.
+   - As an HR team member, I need to organize a company-wide training session, and I want to ensure everyone can register and access necessary materials easily.
+
+2. **Attendee:**
+   - As a regular employee, I want to find and register for events relevant to my interests and job role quickly, preferably through a user-friendly mobile app.
+   - As a new hire, I want to attend onboarding events, and I need a simple way to see which events are mandatory and how to join them.
+
+3. **Administrator:**
+   - As an IT support staff, I need to manage the backend of the platform, ensuring all data is secure and the system operates smoothly during large events.
+   - As a corporate communications member, I want to extract data on event attendance and engagement to report on internal communication effectiveness.
+
+4. **External Participant:**
+   - As a guest speaker, I want to easily understand the schedule, audience, and technical setup of the event I'm participating in, with minimal back-and-forth communication.
+   - As a partner, I want to participate in open events hosted by the company, requiring a straightforward registration and attendance process.
+
+5. **System Developer:**
+   - As a developer, I need to understand the specific requirements of each user group to build a platform that is versatile, reliable, and user-friendly.
+
+These user stories provide a glimpse into the needs and expectations of different stakeholders, guiding the development of a comprehensive and efficient event management platform.
 
 
