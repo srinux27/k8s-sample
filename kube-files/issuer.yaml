@@ -246,3 +246,61 @@ This platform aims to simplify and enhance the experience of managing and partic
 This template outlines the basic structure of the challenge for the hackathon participants. It provides a clear problem statement and specific tasks that need to be addressed, along with potential user stories that bring the problem to life. You can adjust the specific tasks and features based on the technical level of your participants and the resources available.
 
 
+
+
+
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+
+public class ConsistentHashing {
+
+  // The number of topics or nodes in the system
+  private int numTopics;
+
+  // The array of topic positions on the hash ring
+  private int[] topicPositions;
+
+  // The MD5 hash function
+  private MessageDigest md5;
+
+  // The constructor that takes the number of topics as the parameter
+  public ConsistentHashing(int numTopics) {
+    this.numTopics = numTopics;
+    this.topicPositions = new int[numTopics];
+    try {
+      this.md5 = MessageDigest.getInstance("MD5");
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    }
+    // Generate a pseudo-random position for each topic using MD5
+    for (int i = 0; i < numTopics; i++) {
+      byte[] digest = md5.digest(Integer.toString(i).getBytes());
+      int position = (digest[0] & 0xFF) | ((digest[1] & 0xFF) << 8) | ((digest[2] & 0xFF) << 16) | ((digest[3] & 0xFF) << 24);
+      topicPositions[i] = position;
+    }
+    // Sort the topic positions in ascending order
+    Arrays.sort(topicPositions);
+  }
+
+  // The method that takes a key or payment id as the parameter and returns the topic that it should be assigned to
+  public int balanceToTopic(String key) {
+    // Generate a pseudo-random position for the key using MD5
+    byte[] digest = md5.digest(key.getBytes());
+    int position = (digest[0] & 0xFF) | ((digest[1] & 0xFF) << 8) | ((digest[2] & 0xFF) << 16) | ((digest[3] & 0xFF) << 24);
+    // Find the topic that has the smallest position that is greater than or equal to the key's position
+    for (int i = 0; i < numTopics; i++) {
+      if (topicPositions[i] >= position) {
+        return i;
+      }
+    }
+    // If there is no such topic, wrap around the ring and use the topic with the smallest position overall
+    return 0;
+  }
+}
+
+
+
+
+
