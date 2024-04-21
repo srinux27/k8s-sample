@@ -1,35 +1,50 @@
-Certainly! Developing reusable software frameworks for microservices orchestration is a crucial task, especially in distributed architectures. Let's dive into the components you've mentioned:
+Script:
 
-1. **Orchestration Engine**:
-    - The **Orchestration Engine** is a deployable Spring Boot-based project that encapsulates orchestration logic. Here are its key features:
-        - **Workflow Configuration**: It reads workflow configurations stored in a database (such as MongoDB).
-        - **Command and Event Handling**: The engine orchestrates workflows by sending commands and listening to events from participating microservices.
-        - **Data Transfer Object (DTO)**: The engine moves a standardized message (DTO) containing command, event parameters, and payload objects across microservices.
-        - **Payload Enrichment**: Participating microservices can enrich the payload and send it back to the orchestrator if needed.
-        - **Pre-configured Workflows**: Based on pre-configured workflows in the database, the engine routes the DTO with payload to various participating microservices.
-        - **Technology Stack**: The entire engine is built on Spring Boot and uses Kafka for messaging between services.
+1. Payment transformation overview  - what and why?
 
-2. **Reusable Kafka Libraries**:
-    - These libraries enhance Kafka usage within your orchestration framework. Let's explore the customizations:
-        - **Kafka Consumer**:
-            - **Integration with Kafka State Store**: The consumer library integrates with a Kafka state store.
-            - **Dynamic Start/Stop**: It allows starting or stopping consumers on demand via an external API.
-            - **Global KTable Registration**: Upon application startup, the consumer and its state are registered in a global KTable.
-            - **Pause/Resume Mechanism**: Using APIs or automatic error handling, the consumer can be paused or resumed based on service health.
-            - **Temporary Pausing**: If a participating microservice is down, the consumer can be temporarily paused to allow system healing.
-        - **Kafka Producer**:
-            - **Write-Ahead Log Pattern**: The producer library implements the write-ahead log pattern.
-            - **Message Durability**: This ensures that messages are persisted before being sent to Kafka.
-            - **Reliable Communication**: Even if the system crashes, messages are not lost.
-            - **Guaranteed Order**: Messages are written to the log in the order they are produced.
-            - **Ensuring Consistency**: This pattern helps maintain data consistency across services.
+2. Current landscape - 
+	- Vendor driven monoliths (EMTS, GMTS)
+	- Ageing middleware systems like Payment Broker based on IBM web methods (clunky, black box, complex troubleshooting and frequent issues)
+	
+3. Future Landscape - 
+	- Adhere to BIAN philosophy
+	- Follow BIAN prescribed banking domains - payment order, payment executions (BIAN - payment domain) and payment gateway (BIAN - integrations domain)
+	- Payment Order
+		>> Integration with payment origination channels
+		>> Message validations and acknowledgments
+		>> Message transformations if required
+		>> Message enrichment if required
+		>> Message routing based on payment to final execution engine
+		>> Ack/Nack delivery to customer origination channels
 
-Remember, these frameworks and libraries simplify complex microservices interactions, improve system reliability, and enhance development efficiency. 🚀🌟
+	- Payment Execution
+		>> Payment type specific execution engines (WIRES, IP, ACH) etc
+		>> Each payment execution engine will have its lifecycle and integrations. E.g. - WIRES includes
+			- Account Validations
+			- TIER enrichments
+			- Sanctions, EPCL and Fraud Screening
+			- Funds controls
+			- RCS
+			- Integrations with Payment Gateway
+			- Reporting data txmissions
+			- Fee and pricing txmissions
+			- Final posting and settlement
 
-If you need further details or have any specific requirements, feel free to ask! 😊
+	- Payment Gateway 
+		>> Integration of internal bank payment systems with external partner systems and networks
+		>> Currently working n getting this integrated with FED WIRE
+		>> EPG responsibilities include
+			- Final message validations
+			- Message transformation to outgoing format from UPO
+			- Reliably post message to external FED WIRE interface - MQ
+			- Acknowledge posting back to EPE
+			- Offer similar integrations to other networks 
 
-Source: Conversation with Bing, 4/17/2024
-(1) A review of microservice orchestration frameworks - Medium. https://medium.com/trueengineering/a-review-of-microservice-orchestration-frameworks-d22797b34ea5.
-(2) What a Microservices Process Orchestration Framework Is and ... - Gartner. https://www.gartner.com/en/documents/4005774.
-(3) Use Microservices Orchestration Patterns and Frameworks to ... - Gartner. https://www.gartner.com/en/webinar/564464/1272848.
-(4) Top 10 Microservices frameworks for 2023 | by Anil Kurmi ... - Medium. https://medium.com/microservices-architecture/top-10-microservices-framework-for-2020-eefb5e66d1a2.
+
+4. Data consolidations
+	- EPODS is the system that will collate data from all the above mentioned systems and feed to EPODS
+	- EPODS is the data store that will slice and dice and present data to consumers
+	- feed to reporting and analytics systems
+	- long term- data from here can be used to deliver customer, compliance and operations reports
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
