@@ -1,50 +1,6 @@
-Script:
+The image shows a list of key professional contributions and practices of an individual. They have been hands-on with developing and demonstrating working implementations, including various frameworks and platforms such as Cyber Source integration, Kafka, and ESB evaluations. They have advocated for the adoption of new technology within their teams, for instance, championing microservices and event-driven architectures. Significant contributions were made to the development of several in-house applications, promoting the use of new design patterns like event-driven architectures to improve maintainability and resiliency. They've recommended leveraging existing solutions over creating new ones, such as opting for scripting over custom solutions for statement processing. Lastly, they have played a role in the mentoring and hiring process of key individuals in the Payments and Commercial Card spaces, contributing to their growth as subject matter experts.
 
-1. Payment transformation overview  - what and why?
+The page outlines significant achievements in software development and architecture, highlighting the creation of the EPCL application from scratch, which handles half a million transactions daily with minimal production issues, leveraging Kafka, Kafka Streams, Spring Cloud Stream, Mongo DB, and event-driven design. The individual is working on enhancing Kafka frameworks for better resilience and observability within an enterprise payment system, introducing features like write-ahead logs and pausable consumers. As an architect, they've presented viable engineering solutions and played a pivotal role in architecting and documenting architecture for key projects, including Freedom, WVCP, and various integrations. They've advocated for the adoption of mature frameworks to reduce boilerplate code and have been involved in setting up project scaffolding using EPX Frameworks and other Java and integration technologies.
 
-2. Current landscape - 
-	- Vendor driven monoliths (EMTS, GMTS)
-	- Ageing middleware systems like Payment Broker based on IBM web methods (clunky, black box, complex troubleshooting and frequent issues)
-	
-3. Future Landscape - 
-	- Adhere to BIAN philosophy
-	- Follow BIAN prescribed banking domains - payment order, payment executions (BIAN - payment domain) and payment gateway (BIAN - integrations domain)
-	- Payment Order
-		>> Integration with payment origination channels
-		>> Message validations and acknowledgments
-		>> Message transformations if required
-		>> Message enrichment if required
-		>> Message routing based on payment to final execution engine
-		>> Ack/Nack delivery to customer origination channels
+This document outlines a professional's contributions in advancing enterprise payment systems and commercial card space through innovative architecture and leadership. They are spearheading an Enterprise Payment project, pushing for the use of Kafka-centric events choreography to streamline risk control processes. As a global systems architect, they've led technical solutions for the integration of various payment services, such as Visa Freedom and Commercial Card PCI-DSS efforts, requiring a comprehensive view of design solutions. Their initiative to leverage open source middleware, specifically Apache Camel over Oracle SOA/OSB, led to significant vendor independence and cost savings. Additionally, they have been focused on eliminating redundancy by consolidating multiple middleware functions into a single application, demonstrating a commitment to efficiency and modernization.
 
-	- Payment Execution
-		>> Payment type specific execution engines (WIRES, IP, ACH) etc
-		>> Each payment execution engine will have its lifecycle and integrations. E.g. - WIRES includes
-			- Account Validations
-			- TIER enrichments
-			- Sanctions, EPCL and Fraud Screening
-			- Funds controls
-			- RCS
-			- Integrations with Payment Gateway
-			- Reporting data txmissions
-			- Fee and pricing txmissions
-			- Final posting and settlement
-
-	- Payment Gateway 
-		>> Integration of internal bank payment systems with external partner systems and networks
-		>> Currently working n getting this integrated with FED WIRE
-		>> EPG responsibilities include
-			- Final message validations
-			- Message transformation to outgoing format from UPO
-			- Reliably post message to external FED WIRE interface - MQ
-			- Acknowledge posting back to EPE
-			- Offer similar integrations to other networks 
-
-
-4. Data consolidations
-	- EPODS is the system that will collate data from all the above mentioned systems and feed to EPODS
-	- EPODS is the data store that will slice and dice and present data to consumers
-	- feed to reporting and analytics systems
-	- long term- data from here can be used to deliver customer, compliance and operations reports
-
----------------------------------------------------------------------------------------------------------------------------------------------------------------------
