@@ -131,3 +131,31 @@ public class ConsumerService {
         System.out.println("Consumed message: " + message);
     }
 }
+
+
+package com.example.kafkademo.controller;
+
+import com.example.kafkademo.producer.ProducerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class MessageController {
+
+    private final ProducerService producerService;
+
+    @Autowired
+    public MessageController(ProducerService producerService) {
+        this.producerService = producerService;
+    }
+
+    @GetMapping("/send/{message}")
+    public ResponseEntity<String> sendMessage(@PathVariable String message) {
+        producerService.sendMessage(message);
+        return ResponseEntity.ok("Message sent to Kafka topic");
+    }
+}
+
