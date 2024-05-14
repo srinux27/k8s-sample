@@ -1,6 +1,133 @@
-The image shows a list of key professional contributions and practices of an individual. They have been hands-on with developing and demonstrating working implementations, including various frameworks and platforms such as Cyber Source integration, Kafka, and ESB evaluations. They have advocated for the adoption of new technology within their teams, for instance, championing microservices and event-driven architectures. Significant contributions were made to the development of several in-house applications, promoting the use of new design patterns like event-driven architectures to improve maintainability and resiliency. They've recommended leveraging existing solutions over creating new ones, such as opting for scripting over custom solutions for statement processing. Lastly, they have played a role in the mentoring and hiring process of key individuals in the Payments and Commercial Card spaces, contributing to their growth as subject matter experts.
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: kafka-demo-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
-The page outlines significant achievements in software development and architecture, highlighting the creation of the EPCL application from scratch, which handles half a million transactions daily with minimal production issues, leveraging Kafka, Kafka Streams, Spring Cloud Stream, Mongo DB, and event-driven design. The individual is working on enhancing Kafka frameworks for better resilience and observability within an enterprise payment system, introducing features like write-ahead logs and pausable consumers. As an architect, they've presented viable engineering solutions and played a pivotal role in architecting and documenting architecture for key projects, including Freedom, WVCP, and various integrations. They've advocated for the adoption of mature frameworks to reduce boilerplate code and have been involved in setting up project scaffolding using EPX Frameworks and other Java and integration technologies.
 
-This document outlines a professional's contributions in advancing enterprise payment systems and commercial card space through innovative architecture and leadership. They are spearheading an Enterprise Payment project, pushing for the use of Kafka-centric events choreography to streamline risk control processes. As a global systems architect, they've led technical solutions for the integration of various payment services, such as Visa Freedom and Commercial Card PCI-DSS efforts, requiring a comprehensive view of design solutions. Their initiative to leverage open source middleware, specifically Apache Camel over Oracle SOA/OSB, led to significant vendor independence and cost savings. Additionally, they have been focused on eliminating redundancy by consolidating multiple middleware functions into a single application, demonstrating a commitment to efficiency and modernization.
 
+package com.example.kafkademo.config;
+
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.listener.KafkaMessageListenerContainer;
+import org.springframework.kafka.listener.MessageListenerContainer;
+import org.springframework.kafka.listener.config.ContainerProperties;
+import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import org.springframework.kafka.support.converter.StringJsonMessageConverter;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Configuration
+public class KafkaProducerConfig {
+
+    @Bean
+    public ProducerFactory<String, String> producerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
+    public KafkaTemplate<String, String> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+}
+
+
+
+package com.example.kafkademo.config;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@EnableKafka
+@Configuration
+public class KafkaConsumerConfig {
+
+    @Bean
+    public ConsumerFactory<String, String> consumerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-demo-group");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(props);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        return factory;
+    }
+}
+
+
+
+
+package com.example.kafkademo.producer;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ProducerService {
+
+    private static final String TOPIC = "demo_topic";
+
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    public void sendMessage(String message) {
+        kafkaTemplate.send(TOPIC, message);
+    }
+}
+
+
+package com.example.kafkademo.consumer;
+
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ConsumerService {
+
+    @KafkaListener(topics = "demo_topic", groupId = "kafka-demo-group")
+    public void consume(String message) {
+        System.out.println("Consumed message: " + message);
+    }
+}
