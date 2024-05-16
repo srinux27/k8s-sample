@@ -190,3 +190,58 @@ public class TracingConfig {
 }
 
 
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.brave.bridge.BraveTracer;
+import io.micrometer.tracing.exporter.zipkin.ZipkinSpanHandler;
+import io.micrometer.tracing.exporter.zipkin.ZipkinSpanReporter;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.config.ContainerProperties;
+import zipkin2.reporter.AsyncReporter;
+import zipkin2.reporter.Sender;
+import zipkin2.reporter.okhttp3.OkHttpSender;
+import brave.kafka.clients.KafkaTracing;
+
+@Configuration
+public class TracingConfig {
+
+    @Bean
+    public Sender zipkinSender() {
+        return OkHttpSender.create("http://localhost:9411/api/v2/spans");
+    }
+
+    @Bean
+    public AsyncReporter<zipkin2.Span> spanReporter(Sender sender) {
+        return AsyncReporter.create(sender);
+    }
+
+    @Bean
+    public ZipkinSpanReporter zipkinSpanReporter(AsyncReporter<zipkin2.Span> reporter) {
+        return new ZipkinSpanHandler(reporter);
+    }
+
+    @Bean
+    public BraveTracer braveTracer(ZipkinSpanReporter reporter) {
+        return BraveTracer.create(reporter);
+    }
+
+    @Bean
+    public KafkaTracing kafkaTracing(BraveTracer braveTracer) {
+        return KafkaTracing.newBuilder(braveTracer).build();
+    }
+
+    @Bean
+    public ProducerFactory<String, String> producerFactory(KafkaTracing kafkaTracing) {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        // other configs
+        ProducerFactory<String, String> factory = new DefaultKafkaProducerFactory<>(configProps);
+        return kafkaTracing.producerFactory(factory);
+    }
+}
