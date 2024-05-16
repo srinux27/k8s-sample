@@ -323,3 +323,55 @@ public class TracingConfig {
         return new KafkaTemplate<>(producerFactory);
     }
 }
+
+import brave.Span;
+import brave.Tracer;
+import brave.kafka.clients.KafkaTracing;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+
+@Service
+public class TracingKafkaTemplate {
+
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTracing kafkaTracing;
+
+    @Autowired
+    public TracingKafkaTemplate(KafkaTemplate<String, String> kafkaTemplate, KafkaTracing kafkaTracing) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.kafkaTracing = kafkaTracing;
+    }
+
+    public ListenableFuture<SendResult<String, String>> send(String topic, String key, String value) {
+        // Create a producer record
+        ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, value);
+        
+        // Create a span for tracing
+        Span span = kafkaTracing.nextSpan(record).name("producer-send").start();
+        span.annotate("send-start");
+
+        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(record);
+
+        future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
+            @Override
+            public void onSuccess(SendResult<String, String> result) {
+                span.annotate("send-success");
+                span.finish();
+            }
+
+            @Override
+            public void onFailure(Throwable ex) {
+                span.annotate("send-failure");
+                span.error(ex);
+                span.finish();
+            }
+        });
+
+        return future;
+    }
+}
