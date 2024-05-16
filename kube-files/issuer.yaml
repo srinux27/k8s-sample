@@ -245,3 +245,81 @@ public class TracingConfig {
         return kafkaTracing.producerFactory(factory);
     }
 }
+
+
+
+<dependency>
+    <groupId>io.zipkin.reporter2</groupId>
+    <artifactId>zipkin-sender-okhttp3</artifactId>
+</dependency>
+
+
+import brave.Tracing;
+import brave.kafka.clients.KafkaTracing;
+import brave.sampler.Sampler;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.brave.bridge.BraveTracer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerInterceptor;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
+import zipkin2.reporter.AsyncReporter;
+import zipkin2.reporter.Sender;
+import zipkin2.reporter.okhttp3.OkHttpSender;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Configuration
+@EnableKafka
+public class TracingConfig {
+
+    @Bean
+    public Sender zipkinSender() {
+        return OkHttpSender.create("http://localhost:9411/api/v2/spans");
+    }
+
+    @Bean
+    public AsyncReporter<zipkin2.Span> spanReporter(Sender sender) {
+        return AsyncReporter.create(sender);
+    }
+
+    @Bean
+    public Tracing braveTracing(AsyncReporter<zipkin2.Span> reporter) {
+        return Tracing.newBuilder()
+                .localServiceName("your-service-name")
+                .spanReporter(reporter)
+                .sampler(Sampler.ALWAYS_SAMPLE)
+                .build();
+    }
+
+    @Bean
+    public BraveTracer braveTracer(Tracing tracing) {
+        return new BraveTracer(tracing.tracer());
+    }
+
+    @Bean
+    public KafkaTracing kafkaTracing(Tracing tracing) {
+        return KafkaTracing.newBuilder(tracing).build();
+    }
+
+    @Bean
+    public ProducerFactory<String, String> producerFactory(KafkaTracing kafkaTracing) {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, kafkaTracing.producerInterceptor().getClass().getName());
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
+    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
+        return new KafkaTemplate<>(producerFactory);
+    }
+}
