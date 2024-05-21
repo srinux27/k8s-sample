@@ -424,3 +424,27 @@ public class TracingKafkaTemplate {
         return completableFuture;
     }
 }
+
+import brave.handler.SpanHandler;
+import brave.handler.MutableSpan;
+import brave.propagation.TraceContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class CustomSpanHandlerConfig {
+
+    @Bean
+    public SpanHandler customSpanHandler() {
+        return new SpanHandler() {
+            @Override
+            public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+                if ("http".equals(span.tag("http.method"))) {
+                    return false;  // Exclude all HTTP spans
+                }
+                return true;
+            }
+        };
+    }
+}
+
