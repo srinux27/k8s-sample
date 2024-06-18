@@ -1,450 +1,98 @@
-spring:
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: kafka-demo-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
-
-
-package com.example.kafkademo.config;
-
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
-import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.listener.KafkaMessageListenerContainer;
-import org.springframework.kafka.listener.MessageListenerContainer;
-import org.springframework.kafka.listener.config.ContainerProperties;
-import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
-import org.springframework.kafka.support.converter.StringJsonMessageConverter;
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
-
-import java.util.HashMap;
-import java.util.Map;
-
-@Configuration
-public class KafkaProducerConfig {
-
-    @Bean
-    public ProducerFactory<String, String> producerFactory() {
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return new DefaultKafkaProducerFactory<>(configProps);
-    }
-
-    @Bean
-    public KafkaTemplate<String, String> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
-    }
-}
-
-
-
-package com.example.kafkademo.config;
-
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-
-@EnableKafka
-@Configuration
-public class KafkaConsumerConfig {
-
-    @Bean
-    public ConsumerFactory<String, String> consumerFactory() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-demo-group");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        return new DefaultKafkaConsumerFactory<>(props);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-        return factory;
-    }
-}
-
-
-
-
-package com.example.kafkademo.producer;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
-
-@Service
-public class ProducerService {
-
-    private static final String TOPIC = "demo_topic";
-
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
-
-    public void sendMessage(String message) {
-        kafkaTemplate.send(TOPIC, message);
-    }
-}
-
-
-package com.example.kafkademo.consumer;
-
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
-
-@Service
-public class ConsumerService {
-
-    @KafkaListener(topics = "demo_topic", groupId = "kafka-demo-group")
-    public void consume(String message) {
-        System.out.println("Consumed message: " + message);
-    }
-}
-
-
-package com.example.kafkademo.controller;
-
-import com.example.kafkademo.producer.ProducerService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-public class MessageController {
-
-    private final ProducerService producerService;
-
-    @Autowired
-    public MessageController(ProducerService producerService) {
-        this.producerService = producerService;
-    }
-
-    @GetMapping("/send/{message}")
-    public ResponseEntity<String> sendMessage(@PathVariable String message) {
-        producerService.sendMessage(message);
-        return ResponseEntity.ok("Message sent to Kafka topic");
-    }
-}
-
-
-
-import brave.Tracing;
-import brave.kafka.clients.KafkaTracing;
-import zipkin2.reporter.AsyncReporter;
-import zipkin2.reporter.urlconnection.URLConnectionSender;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class TracingConfig {
-
-    @Bean
-    public Tracing tracing() {
-        URLConnectionSender sender = URLConnectionSender.create("http://localhost:9411/api/v2/spans");
-        AsyncReporter<zipkin2.Span> reporter = AsyncReporter.create(sender);
-
-        return Tracing.newBuilder()
-            .localServiceName("kafka-demo")
-            .spanReporter(reporter)
-            .build();
-    }
-
-    @Bean
-    public KafkaTracing kafkaTracing(Tracing tracing) {
-        return KafkaTracing.create(tracing);
-    }
-}
-
-
-import io.micrometer.tracing.Tracer;
-import io.micrometer.tracing.brave.bridge.BraveTracer;
-import io.micrometer.tracing.exporter.zipkin.ZipkinSpanHandler;
-import io.micrometer.tracing.exporter.zipkin.ZipkinSpanReporter;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
-import org.springframework.kafka.listener.config.ContainerProperties;
-import zipkin2.reporter.AsyncReporter;
-import zipkin2.reporter.Sender;
-import zipkin2.reporter.okhttp3.OkHttpSender;
-import brave.kafka.clients.KafkaTracing;
-
-@Configuration
-public class TracingConfig {
-
-    @Bean
-    public Sender zipkinSender() {
-        return OkHttpSender.create("http://localhost:9411/api/v2/spans");
-    }
-
-    @Bean
-    public AsyncReporter<zipkin2.Span> spanReporter(Sender sender) {
-        return AsyncReporter.create(sender);
-    }
-
-    @Bean
-    public ZipkinSpanReporter zipkinSpanReporter(AsyncReporter<zipkin2.Span> reporter) {
-        return new ZipkinSpanHandler(reporter);
-    }
-
-    @Bean
-    public BraveTracer braveTracer(ZipkinSpanReporter reporter) {
-        return BraveTracer.create(reporter);
-    }
-
-    @Bean
-    public KafkaTracing kafkaTracing(BraveTracer braveTracer) {
-        return KafkaTracing.newBuilder(braveTracer).build();
-    }
-
-    @Bean
-    public ProducerFactory<String, String> producerFactory(KafkaTracing kafkaTracing) {
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        // other configs
-        ProducerFactory<String, String> factory = new DefaultKafkaProducerFactory<>(configProps);
-        return kafkaTracing.producerFactory(factory);
-    }
-}
-
-
-
-<dependency>
-    <groupId>io.zipkin.reporter2</groupId>
-    <artifactId>zipkin-sender-okhttp3</artifactId>
-</dependency>
-
-
-import brave.Tracing;
-import brave.kafka.clients.KafkaTracing;
-import brave.sampler.Sampler;
-import io.micrometer.tracing.Tracer;
-import io.micrometer.tracing.brave.bridge.BraveTracer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerInterceptor;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
-import zipkin2.reporter.AsyncReporter;
-import zipkin2.reporter.Sender;
-import zipkin2.reporter.okhttp3.OkHttpSender;
-
-import java.util.HashMap;
-import java.util.Map;
-
-@Configuration
-@EnableKafka
-public class TracingConfig {
-
-    @Bean
-    public Sender zipkinSender() {
-        return OkHttpSender.create("http://localhost:9411/api/v2/spans");
-    }
-
-    @Bean
-    public AsyncReporter<zipkin2.Span> spanReporter(Sender sender) {
-        return AsyncReporter.create(sender);
-    }
-
-    @Bean
-    public Tracing braveTracing(AsyncReporter<zipkin2.Span> reporter) {
-        return Tracing.newBuilder()
-                .localServiceName("your-service-name")
-                .spanReporter(reporter)
-                .sampler(Sampler.ALWAYS_SAMPLE)
-                .build();
-    }
-
-    @Bean
-    public BraveTracer braveTracer(Tracing tracing) {
-        return new BraveTracer(tracing.tracer());
-    }
-
-    @Bean
-    public KafkaTracing kafkaTracing(Tracing tracing) {
-        return KafkaTracing.newBuilder(tracing).build();
-    }
-
-    @Bean
-    public ProducerFactory<String, String> producerFactory(KafkaTracing kafkaTracing) {
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, kafkaTracing.producerInterceptor().getClass().getName());
-        return new DefaultKafkaProducerFactory<>(configProps);
-    }
-
-    @Bean
-    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
-    }
-}
-
-import brave.Span;
-import brave.Tracer;
-import brave.kafka.clients.KafkaTracing;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-
-@Service
-public class TracingKafkaTemplate {
-
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final KafkaTracing kafkaTracing;
-
-    @Autowired
-    public TracingKafkaTemplate(KafkaTemplate<String, String> kafkaTemplate, KafkaTracing kafkaTracing) {
-        this.kafkaTemplate = kafkaTemplate;
-        this.kafkaTracing = kafkaTracing;
-    }
-
-    public ListenableFuture<SendResult<String, String>> send(String topic, String key, String value) {
-        // Create a producer record
-        ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, value);
-        
-        // Create a span for tracing
-        Span span = kafkaTracing.nextSpan(record).name("producer-send").start();
-        span.annotate("send-start");
-
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(record);
-
-        future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
-            @Override
-            public void onSuccess(SendResult<String, String> result) {
-                span.annotate("send-success");
-                span.finish();
-            }
-
-            @Override
-            public void onFailure(Throwable ex) {
-                span.annotate("send-failure");
-                span.error(ex);
-                span.finish();
-            }
-        });
-
-        return future;
-    }
-}
-
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
-import brave.Span;
-import brave.kafka.clients.KafkaTracing;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.concurrent.CompletableFuture;
-
-public class TracingKafkaTemplate {
-
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final KafkaTracing kafkaTracing;
-
-    @Autowired
-    public TracingKafkaTemplate(KafkaTemplate<String, String> kafkaTemplate, KafkaTracing kafkaTracing) {
-        this.kafkaTemplate = kafkaTemplate;
-        this.kafkaTracing = kafkaTracing;
-    }
-
-    public CompletableFuture<SendResult<String, String>> send(String topic, String key, String value) {
-        // Create a producer record
-        ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, value);
-
-        // Create a span for tracing
-        Span span = kafkaTracing.nextSpan(record).name("producer-send").start();
-        span.annotate("send-start");
-
-        // Send the record using KafkaTemplate and get a CompletableFuture
-        CompletableFuture<SendResult<String, String>> completableFuture = kafkaTemplate.send(record).completable();
-
-        // Handle success
-        completableFuture.thenAccept(result -> {
-            span.annotate("send-success");
-            span.finish();
-        });
-
-        // Handle failure
-        completableFuture.exceptionally(ex -> {
-            span.annotate("send-failure");
-            span.error(ex);
-            span.finish();
-            return null;
-        });
-
-        return completableFuture;
-    }
-}
-
-import brave.handler.SpanHandler;
-import brave.handler.MutableSpan;
-import brave.propagation.TraceContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class CustomSpanHandlerConfig {
-
-    @Bean
-    public SpanHandler customSpanHandler() {
-        return new SpanHandler() {
-            @Override
-            public boolean end(TraceContext context, MutableSpan span, Cause cause) {
-                if ("http".equals(span.tag("http.method"))) {
-                    return false;  // Exclude all HTTP spans
-                }
-                return true;
-            }
-        };
-    }
-}
-
+Certainly! Here’s how you can create a document in Confluence for the feature "Full Life Cycle Verification via Penny Transaction" with the indicated sections in the format shown in your uploaded image. 
+
+### Example Document in Confluence
+
+**Page Title: Feature: Full Life Cycle Verification via Penny Transaction**
+
+---
+
+## Feature: Full Life Cycle Verification via Penny Transaction
+
+### Description
+As a system user, I want to verify the full transaction life cycle using a penny transaction so that I can ensure the payment processing system is functioning correctly.
+
+### So That I Can
+- Ensure the payment system processes transactions correctly through all involved systems.
+- Detect and resolve any issues in the payment process at various stages, such as payment validation, fraud check, sanctions screening, funds availability check, posting, and confirmation.
+- Ensure that the system is reliable and compliant with all required standards and regulations.
+
+---
+
+### Acceptance Criteria
+- **Setup Systems:**
+  - **Payment Validation:** The system should be able to validate the penny transaction and flag any anomalies.
+  - **Fraud Check:** The system should screen for fraudulent activities and flag suspicious transactions.
+  - **Sanctions Screening:** The system should screen the transaction against sanctions lists and flag any matches.
+  - **Funds Availability:** The system should verify that sufficient funds are available before processing the transaction.
+  - **Posting and Confirmation:** The system should correctly post the transaction and send confirmation notifications.
+
+- **Transaction Processing:**
+  - The system processes a penny transaction and deducts one penny from the sender's account.
+  - The sender's transaction history shows the penny transaction with a "Completed" status.
+  - The receiver's transaction history shows the penny transaction with a "Completed" status.
+  - The system can reverse the penny transaction, crediting one penny back to the sender's account.
+  - The sender's transaction history shows the reversal with a "Reversed" status.
+  - The receiver's transaction history shows the reversal with a "Reversed" status.
+  - Notifications are sent upon successful completion and reversal of the transaction.
+
+---
+
+### Stories
+
+#### Story 1: Setup Payment Validation System
+**Description:** As a user, I want to set up the payment validation system to handle penny transactions.
+**Acceptance Criteria:**
+- The system should be configured to accept and process penny transactions.
+- Any anomalies detected during the validation process should be flagged and reported.
+
+#### Story 2: Setup Fraud Check System
+**Description:** As a user, I want to set up the fraud check system to monitor penny transactions.
+**Acceptance Criteria:**
+- The system should screen all penny transactions for fraudulent activities.
+- Suspicious transactions should be flagged and reported.
+
+#### Story 3: Setup Sanctions Screening System
+**Description:** As a user, I want to set up the sanctions screening system to ensure compliance.
+**Acceptance Criteria:**
+- The system should screen penny transactions against relevant sanctions lists.
+- Any matches should be flagged and reported.
+
+#### Story 4: Setup Funds Availability Check
+**Description:** As a user, I want to set up the funds availability check for penny transactions.
+**Acceptance Criteria:**
+- The system should verify the availability of funds before processing penny transactions.
+- Transactions should be flagged if sufficient funds are not available.
+
+#### Story 5: Setup Posting and Confirmation System
+**Description:** As a user, I want to set up the posting and confirmation system for penny transactions.
+**Acceptance Criteria:**
+- The system should correctly post penny transactions and send confirmation notifications to the users.
+
+#### Story 6: Process a Penny Transaction
+**Description:** As a user, I want to initiate and process a penny transaction to verify the system.
+**Acceptance Criteria:**
+- The system should process the transaction and deduct one penny from the sender's account.
+- The sender’s and receiver’s transaction histories should reflect the transaction with a "Completed" status.
+
+#### Story 7: Reverse a Penny Transaction
+**Description:** As a user, I want to reverse a penny transaction to verify the system's reversal process.
+**Acceptance Criteria:**
+- The system should process the reversal and credit one penny back to the sender's account.
+- The sender’s and receiver’s transaction histories should reflect the reversal with a "Reversed" status.
+
+#### Story 8: Confirm Notifications for Transactions
+**Description:** As a user, I want to receive notifications upon the completion and reversal of penny transactions.
+**Acceptance Criteria:**
+- The system should send notifications confirming the transaction completion.
+- The system should send notifications confirming the transaction reversal.
+
+---
+
+### Additional Information
+- **Diagrams or Flowcharts:** Include diagrams or flowcharts showing the flow of the penny transaction through the various systems.
+- **Links to Related Documentation:** Add links to technical documentation, setup guides, and project requirements.
+- **Attachments:** Attach relevant documents, such as system configuration details, test data, and setup procedures.
+
+---
+
+By following these steps, you can create a comprehensive and well-structured document in Confluence for the feature of penny transaction testing. This document will help ensure that all aspects of the feature are thoroughly planned, documented, and tested.
